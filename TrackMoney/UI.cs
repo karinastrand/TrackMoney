@@ -27,35 +27,47 @@ public class UI
                         transactionHandling.ShowAllTransactions();
                         break;
                     }
-
                 case "2":
+                    {
+                        //Shows Transactions
+                        transactionHandling.ShowAllTransactionsSortedByTitle();
+                        break;
+                    }
+                case "3":
+                    {
+                        //Shows Transactions
+                        transactionHandling.ShowAllTransactionsSortedByAmount();
+                        break;
+                    }
+
+                case "4":
                     {
                         //Shows Transactions
                         transactionHandling.ShowIncomes();
                         break; 
                     }
                 
-                case "3":
+                case "5":
                     {
                         //Shows Transactions
                         transactionHandling.ShowExpenses();
                         break;
                     } 
-               case "4":
+               case "6":
                     {
                         //Adding new Task
                         transactionHandling.AddTransactions();
                         break;
                     }
                
-                case "5":
+                case "7":
                     {
                         //Showing Edit menu and handles the user input
                         EditMenuChoise();
                         break;
                     }
-                case "6":
-                case "7":
+                case "8":
+                case "9":
                     {
                         //Saves the Tasks and Projests to files
                         transactionHandling.TransactionsToFile();
@@ -68,7 +80,7 @@ public class UI
                         break;
                     }
             }
-            if (menuChoise == "7")
+            if (menuChoise == "9")
             {
                 //Exit the program
                 break;
@@ -89,27 +101,20 @@ public class UI
                         transactionHandling.ChangeTitle();
                         break;
                     }
-
                 case "2":
-                    {
-                        //Change Project Description
-                        transactionHandling.ChangeType();
-                        break;
-                    }
-                case "3":
                     {
                         //Change Project Description
                         transactionHandling.ChangeAmount();
                         break;
                     }
-                case "4":
+                case "3":
                     {
                         //Removing Projects
                         transactionHandling.ChangeDate();
                         break;
                     }
                
-                case "5":
+                case "4":
                     {
                         //Removing Tasks
                         transactionHandling.RemoveTransactions();
@@ -122,7 +127,7 @@ public class UI
                         break;
                     }
             }
-            if (menuChoise == "6")
+            if (menuChoise == "5")
             {
                 //Exiting the Edit Menu
                 break;

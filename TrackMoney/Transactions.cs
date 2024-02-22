@@ -17,14 +17,41 @@ public class Transactions
     public List<Transaction> TransactionList { get; set; } = new List<Transaction>();
 
     public void ShowAllTransactions()
+    {//Sorted by year and then month
+        List<Transaction> SortedTransactions = TransactionList.OrderBy(transaction=>transaction.TransactionDate.Year).ThenBy(transaction=>transaction.TransactionDate.Month).ToList();
+        WriteLine("All transactions");
+        WriteLine("Id".PadRight(5)+"Titel".PadRight(15)+"Amount".PadRight(15)+"Year".PadLeft(8)+"Month".PadLeft(8));
+        foreach (Transaction transaction in SortedTransactions) 
+        {
+            transaction.Print();
+        }
+    }
+    public void ShowAllTransactionsSortedByTitle()
     {
-        foreach (Transaction transaction in TransactionList) 
+        List<Transaction> SortedTransactions = TransactionList.OrderBy(transaction => transaction.Title).ToList();
+
+        WriteLine("All transactions");
+        WriteLine("Id".PadRight(5) + "Titel".PadRight(15) + "Amount".PadRight(15) + "Year".PadLeft(8) + "Month".PadLeft(8));
+        foreach (Transaction transaction in SortedTransactions)
+        {
+            transaction.Print();
+        }
+    }
+    public void ShowAllTransactionsSortedByAmount()
+    {
+        List<Transaction> SortedTransactions = TransactionList.OrderBy(transaction => transaction.Amount).ToList();
+
+        WriteLine("All transactions");
+        WriteLine("Id".PadRight(5) + "Titel".PadRight(15) + "Amount".PadRight(15) + "Year".PadLeft(8) + "Month".PadLeft(8));
+        foreach (Transaction transaction in SortedTransactions)
         {
             transaction.Print();
         }
     }
     public void ShowIncomes()
     {
+        WriteLine("Incomes");
+        WriteLine("Id".PadRight(5) + "Titel".PadRight(15) + "Amount".PadRight(15) + "Year".PadLeft(8) + "Month".PadLeft(8));
         foreach (Transaction transaction in TransactionList)
         {
             if(transaction.GetType().ToString().Contains("Income"))
@@ -33,6 +60,8 @@ public class Transactions
     }
     public void ShowExpenses()
     {
+        WriteLine("Expenses");
+        WriteLine("Id".PadRight(5) + "Titel".PadRight(15) + "Amount".PadRight(15) + "Year".PadLeft(8) + "Month".PadLeft(8));
         foreach (Transaction transaction in TransactionList)
         {
             if (transaction.GetType().ToString().Contains("Expense"))
@@ -75,15 +104,20 @@ public class Transactions
                 WriteLine("The date has to be on the format 'yyyy-mm-dd' for example 2024-02-10");
                 continue;
             }
+            int id = 1;
+            if (TransactionList.Count()>0) 
+            {
+                id = TransactionList.Max(transaction => transaction.Id) + 1;
+            }
             if(amount> 0) 
             {
-                Income income = new Income(title,amount,date);
+                Income income = new Income(id,title,amount,date);
                 TransactionList.Add(income);
 
             }
             else if (amount < 0)
             {
-                Expense expense = new Expense(title, amount, date);
+                Expense expense = new Expense(id,title, amount, date);
                 TransactionList.Add(expense);
             }
             else 
@@ -95,48 +129,139 @@ public class Transactions
 
     }
     
-    public void EditTransactions()
+    public int EditTransactions(string message)
     {
+        ShowAllTransactions();
+        WriteLine(message+" :");
+        string answer = ReadLine();
+        int id = 0;
+        try
+        {
+            id=Convert.ToInt32(answer);
+            if(!TransactionExists(id)) 
+            {
+                WriteLine("There is no transaction with that id in your list");
+            }
+        }
+        catch (FormatException)
+        {
+            Console.WriteLine("The id has to be an integer");
+        }
+        return id;
+        
 
     }
     public void ChangeTitle()
     {
-
+        int id=EditTransactions("Which transaction do you want to change title on? (Write id)");
+        if (id>0)    
+        {
+            Transaction transactionToEdit = GetTransaction(id);
+            WriteLine($"Old Title: {transactionToEdit.Title}");
+            Write("New Title: ");
+            string title = ReadLine();
+            transactionToEdit.Title = title;
+        }
+        
     }
-    public void ChangeType()
+    public void ChangeType(int id, double amount)
     {
-
+        Transaction transactionToChange = GetTransaction(id);
+       
+        if (transactionToChange.GetType().ToString().Contains("Income"))
+        {
+            Expense newTransaction= new Expense(transactionToChange.Id,transactionToChange.Title, amount, transactionToChange.TransactionDate);
+            TransactionList.Remove(transactionToChange);
+            TransactionList.Add(newTransaction);
+        }
+        else 
+        {
+            Income newTransaction = new Income(transactionToChange.Id, transactionToChange.Title, amount, transactionToChange.TransactionDate);
+            TransactionList.Remove(transactionToChange);
+            TransactionList.Add(newTransaction);
+        }
+        
     }
     public void ChangeAmount()
     {
+        int id = EditTransactions("Which transaction do you want to change amount on? (Write id)");
+        if (id > 0)
+        {
+            Transaction transactionToEdit = GetTransaction(id);
+            WriteLine($"Old Amoutn: {transactionToEdit.Amount}");
+            Write("New Amount: ");
+            string stringAmount = ReadLine();
+            double amount;
+            try
+            {
+                amount=Convert.ToDouble(stringAmount);
+                transactionToEdit.Amount = amount;
+                if ((transactionToEdit.GetType().ToString().Contains("Income") && amount <0)|| (transactionToEdit.GetType().ToString().Contains("Expense") && amount > 0))
+                {
+                    ChangeType(id, amount);
+                }
 
+            }
+            catch (Exception)
+            {
+                WriteLine("It has to be a number");
+            }
+            
+        }
     }
     public void ChangeDate()
     {
-
+        int id = EditTransactions("Which transaction do you want to change date on? (Write id)");
+        if (id > 0)
+        {
+            Transaction transactionToEdit = GetTransaction(id);
+            WriteLine($"Old Date: {transactionToEdit.TransactionDate}");
+            Write("New Date: ");
+            string stringDate = ReadLine();
+            try
+            {
+                DateTime transactionDate = Convert.ToDateTime(stringDate);
+                transactionToEdit.TransactionDate=transactionDate;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("It has to be a date on format 'yyyy-mm-dd' for example '2024-02-28'");
+            }
+            
+        }
     }
     public void RemoveTransactions()
     {
+        int id = EditTransactions("Which transaction do you want to remove? (Write id)");
+        if (id > 0)
+        {
+            Transaction transactionToEdit = GetTransaction(id);
+            if(TransactionList.Remove(transactionToEdit))
+            {
+                WriteLine("The transaction is removed");
+            }
+            else
+            {
+                WriteLine("Something went wrong");
 
+            }
+        }
     }
-    public void TransactionsToStringList()
-    {
-
-
-    }
+   
     public void GetFromStrings(List<string> transactionStrings)
     {
         foreach (string transactionString in transactionStrings)
         {
             string[] transactionParts= transactionString.Split(',');
-            if (transactionParts[0].Contains("Income"))
+            if (transactionParts[1].Contains("Income"))
             {
-                Income income=new Income(transactionParts[1], Convert.ToDouble(transactionParts[2]), Convert.ToDateTime(transactionParts[3]));
+                int id = Convert.ToInt32(transactionParts[0]);
+                Income income=new Income(id,transactionParts[2], Convert.ToDouble(transactionParts[3]), Convert.ToDateTime(transactionParts[4]));
                 TransactionList.Add(income);
             }
             else
             {
-                Expense expense = new Expense(transactionParts[1], Convert.ToDouble(transactionParts[2]), Convert.ToDateTime(transactionParts[3]));
+                Expense expense = new Expense(Convert.ToInt32(transactionParts[0]),transactionParts[2], Convert.ToDouble(transactionParts[3]), Convert.ToDateTime(transactionParts[4]));
                 TransactionList.Add(expense);
             }
             
@@ -154,7 +279,7 @@ public class Transactions
     }
     public void TransactionsInfo()
     {
-
+        WriteLine($"You have currently {SumTransactions().ToString("c")} on your account");
     }
     public void SaveToFile(List<string> stringTransactions)
     {
@@ -167,5 +292,17 @@ public class Transactions
         List<string> stringTransactions=fileHandling.ReadFromFile();
         GetFromStrings(stringTransactions);
         
+    }
+    public bool TransactionExists(int id)
+    {
+        return TransactionList.Exists(transaction=>transaction.Id==id);
+    }
+    public Transaction GetTransaction(int id)
+    {
+        return TransactionList.Where(transaction=>transaction.Id==id).FirstOrDefault();      
+    }
+    public double SumTransactions()
+    {
+        return TransactionList.Sum(transaction=>transaction.Amount);
     }
 }
